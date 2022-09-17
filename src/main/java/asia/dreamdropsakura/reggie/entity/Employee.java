@@ -23,6 +23,11 @@ public class Employee implements Serializable {
 
     private String name;
 
+    /**
+     * 员工密码，设置为返回结果集时不包含
+     *
+     */
+    @TableField(select = false)
     private String password;
 
     private String phone;

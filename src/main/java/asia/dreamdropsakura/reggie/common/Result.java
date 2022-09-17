@@ -15,7 +15,7 @@ import java.util.Map;
 public class Result<T> {
 
     /**
-     * 编码：1成功，0和其它数字为失败
+     * 编码：1成功，其它数字为失败
      *
      */
     private Integer code;
