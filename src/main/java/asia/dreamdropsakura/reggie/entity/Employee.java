@@ -35,6 +35,10 @@ public class Employee implements Serializable {
      */
     private String idNumber;
 
+    /**
+     * 用户账号状态
+     *
+     */
     private Integer status;
 
     private LocalDateTime createTime;
