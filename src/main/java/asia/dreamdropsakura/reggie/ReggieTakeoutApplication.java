@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  */
 @SpringBootApplication
 @MapperScan("asia.dreamdropsakura.reggie.mapper")
-@ComponentScan("")
+@ComponentScan
 public class ReggieTakeoutApplication {
 
 	public static void main(String[] args) {

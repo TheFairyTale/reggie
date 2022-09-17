@@ -43,6 +43,7 @@ public class Employee implements Serializable {
     /**
      * 用户账号状态
      *
+     * 0禁用 1正常
      */
     private Integer status;
 
