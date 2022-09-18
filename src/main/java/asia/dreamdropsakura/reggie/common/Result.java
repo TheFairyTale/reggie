@@ -1,7 +1,9 @@
 package asia.dreamdropsakura.reggie.common;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +14,7 @@ import java.util.Map;
  * @since 2022-9-17
  */
 @Data
-public class Result<T> {
+public class Result<T> implements Serializable {
 
     /**
      * 编码：1成功，其它数字为失败
@@ -62,6 +64,20 @@ public class Result<T> {
         Result<T> r = new Result<>();
         r.msg = msg;
         r.code = 0;
+        return r;
+    }
+
+    /**
+     * 返回成功对象
+     *
+     * @param msg
+     * @return
+     * @param <T>
+     */
+    public static <T> Result<T> success(String msg) {
+        Result<T> r = new Result<>();
+        r.msg = msg;
+        r.code = 1;
         return r;
     }
 
