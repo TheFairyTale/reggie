@@ -42,13 +42,13 @@ public class Result<T> implements Serializable {
     /**
      * 返回成功对象
      *
-     * @param object
+     * @param data
      * @return
      * @param <T>
      */
-    public static <T> Result<T> success(T object) {
+    public static <T> Result<T> success(T data) {
         Result<T> r = new Result<>();
-        r.data = object;
+        r.data = data;
         r.code = 1;
         return r;
     }
