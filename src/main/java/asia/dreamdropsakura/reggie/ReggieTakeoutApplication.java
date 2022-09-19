@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @SpringBootApplication
 @MapperScan("asia.dreamdropsakura.reggie.mapper")
 @ComponentScan
-// 为应用程序启用Filter 功能
+// 为应用程序启用javax 中的WebFilter 功能
 @ServletComponentScan
 public class ReggieTakeoutApplication {
 
