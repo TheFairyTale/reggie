@@ -18,7 +18,7 @@
   </style>
 </head>
 
-<body style="border: 10px solid black;">
+<body style="">
   <div class="dashboard-container" id="member-app">
     <div class="container">
       <div class="tableBar">
@@ -55,7 +55,7 @@
       <el-pagination class="pageList" :page-sizes="pageSizes" :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper" :total="counts" :current-page.sync="page"
         @size-change="handleSizeChange" @current-change="handleCurrentChange"></el-pagination>
-      阿八八
+
     </div>
   </div>
   <!-- 开发环境版本，包含了有帮助的命令行警告 -->
@@ -74,7 +74,7 @@
           input: '',
           counts: 0,
           page: 1,
-          pageSize: 10,
+          pageSize: 7,
           pageSizes: [2, 5, 7, 10, 15, 20, 30, 50, 100, 200, 400],
           tableData: [],
           id: '',
