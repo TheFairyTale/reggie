@@ -1,5 +1,6 @@
 package asia.dreamdropsakura.reggie.common;
 
+import asia.dreamdropsakura.reggie.util.LocalThreadVariablePoolUtil;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
@@ -23,10 +24,11 @@ public class CommonEntityFieldAutoFillHandler implements MetaObjectHandler {
      */
     @Override
     public void insertFill(MetaObject metaObject) {
+        Long currentThreadUserid = LocalThreadVariablePoolUtil.getCurrentThreadUserid();
         metaObject.setValue("createTime", LocalDateTime.now());
         metaObject.setValue("updateTime", LocalDateTime.now());
-        metaObject.setValue("createUser", 1L);
-        metaObject.setValue("updateUser", 1L);
+        metaObject.setValue("createUser", currentThreadUserid);
+        metaObject.setValue("updateUser", currentThreadUserid);
     }
 
     /**
@@ -36,7 +38,8 @@ public class CommonEntityFieldAutoFillHandler implements MetaObjectHandler {
      */
     @Override
     public void updateFill(MetaObject metaObject) {
+        Long currentThreadUserid = LocalThreadVariablePoolUtil.getCurrentThreadUserid();
         metaObject.setValue("updateTime", LocalDateTime.now());
-        metaObject.setValue("updateUser", 1L);
+        metaObject.setValue("updateUser", currentThreadUserid);
     }
 }

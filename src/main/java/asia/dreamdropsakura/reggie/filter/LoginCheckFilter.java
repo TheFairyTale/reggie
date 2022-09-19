@@ -2,6 +2,7 @@ package asia.dreamdropsakura.reggie.filter;
 
 import asia.dreamdropsakura.reggie.common.Result;
 import asia.dreamdropsakura.reggie.entity.Employee;
+import asia.dreamdropsakura.reggie.util.LocalThreadVariablePoolUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
@@ -77,6 +78,12 @@ public class LoginCheckFilter implements Filter {
         // 判断请求是否携带有指定的session 对象
         if (httpServletRequest.getSession().getAttribute("employee") != null) {
             // 如果有
+
+            // 设置线程变量. 这行代码不可以写在if 外面，只有在确认请求确实携带有employee session 时才继续
+            long employee = (Long) httpServletRequest.getSession().getAttribute("employee");
+            log.info("[LoginCheckFilter]获得的employee值：" + employee);
+            LocalThreadVariablePoolUtil.setCurrentThreadUserid(employee);
+
             //System.out.println("用户已经登录" + httpServletRequest.getSession().getAttribute("employee"));
             filterChain.doFilter(servletRequest, servletResponse);
             return;
