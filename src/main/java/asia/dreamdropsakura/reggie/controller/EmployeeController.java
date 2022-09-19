@@ -94,13 +94,6 @@ public class EmployeeController {
         if (employee != null && employee.getUsername() != null) {
             // 设置新用户的初始密码
             employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
-            // 设置该新增用户的新增时间
-            employee.setCreateTime(LocalDateTime.now());
-            employee.setUpdateTime(LocalDateTime.now());
-            // 设置该新增用户为哪位用户新增的
-            Object employee1 = servletRequest.getSession().getAttribute("employee");
-            employee.setUpdateUser((Long) employee1);
-            employee.setCreateUser((Long) employee1);
 
             // 提交
             employeeService.save(employee);
@@ -129,8 +122,6 @@ public class EmployeeController {
      */
     @PutMapping
     public Result<String> prohibitEmployee(HttpServletRequest httpServletRequest, @RequestBody Employee employee) {
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser((Long) httpServletRequest.getSession().getAttribute("employee"));
         employeeService.update(employee, new QueryWrapper<Employee>().eq("id", employee.getId()));
         return Result.success("成功");
     }
