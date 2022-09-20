@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 分类管理相关控制器类
+ * 菜品与套餐分类管理相关控制器类
  *
  * @author 童话的爱
  * @since 2022-9-19
@@ -24,7 +24,7 @@ public class CategoryController {
     private CategoryService categoryService;
 
     /**
-     * 分页获取所有套餐与菜品
+     * 分页获取所有套餐与菜品分类
      *
      * @param page 当前页数
      * @param pageSize 每页记录数
@@ -38,7 +38,7 @@ public class CategoryController {
     }
 
     /**
-     * 新增套餐、菜品接口
+     * 新增套餐、菜品分类的接口
      *
      * @param category
      * @return
@@ -53,7 +53,7 @@ public class CategoryController {
     }
 
     /**
-     * 删除套餐、菜品接口
+     * 删除套餐、菜品分类的接口
      *
      */
     @DeleteMapping

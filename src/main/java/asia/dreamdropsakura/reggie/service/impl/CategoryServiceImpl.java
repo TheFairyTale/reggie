@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**
- * 分类管理业务代码实现类
+ * 菜品与套餐分类管理业务代码实现类
  *
  * @author 童话的爱
  * @since 2022-9-19

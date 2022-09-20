@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 分类管理
+ * 菜品与套餐分类管理
  *
  * @author 童话的爱
  * @since 2022-9-19
