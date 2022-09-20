@@ -111,6 +111,7 @@ public class EmployeeController {
      */
     @GetMapping("/page")
     public Result<IPage> getEmployees(int page, int pageSize, String name) {
+        // IPage 对象封装了分页操作相关的数据
         IPage<Employee> employeePage = new Page<>(page, pageSize);
         IPage<Employee> page1 = employeeService.page(employeePage, new LambdaQueryWrapper<Employee>().like(name != null, Employee::getName, name).orderByAsc(Employee::getUpdateTime));
         return Result.success(page1);
