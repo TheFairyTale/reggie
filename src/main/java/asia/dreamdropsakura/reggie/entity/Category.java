@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 菜品与套餐分类管理
+ * 菜系与套餐分类管理
  *
  * @author 童话的爱
  * @since 2022-9-19
@@ -21,7 +21,7 @@ public class Category implements Serializable {
     private Long id;
 
     /**
-     * 类型 1 菜品分类 2 套餐分类
+     * 类型 1 菜系分类 2 套餐分类
      *
      */
     private Integer type;
