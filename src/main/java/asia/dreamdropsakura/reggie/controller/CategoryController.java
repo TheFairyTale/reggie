@@ -58,7 +58,10 @@ public class CategoryController {
      */
     @DeleteMapping
     public Result<String> deleteCategory(@RequestParam long id) {
-        categoryService.removeById(id);
+        boolean b = categoryService.removeById(id);
+        if (!b) {
+            return Result.error("无法删除指定的套餐或菜品的分类，可能该项已经被删除？");
+        }
         return Result.success("删除成功");
     }
 

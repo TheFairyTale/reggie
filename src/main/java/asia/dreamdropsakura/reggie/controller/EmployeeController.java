@@ -123,8 +123,11 @@ public class EmployeeController {
      */
     @PutMapping
     public Result<String> prohibitEmployee(HttpServletRequest httpServletRequest, @RequestBody Employee employee) {
-        employeeService.update(employee, new QueryWrapper<Employee>().eq("id", employee.getId()));
-        return Result.success("成功");
+        boolean id = employeeService.update(employee, new QueryWrapper<Employee>().eq("id", employee.getId()));
+        if (id) {
+            return Result.success("成功");
+        }
+        return Result.error("禁用时出现问题，请刷新后重试");
     }
 
     /**
@@ -134,6 +137,9 @@ public class EmployeeController {
     @GetMapping("/{id}")
     public Result<Employee> getEmployeeById(@PathVariable long id) {
         Employee byId = employeeService.getById(id);
+        if (byId == null) {
+            return Result.error("指定的员工不存在，可能该员工已经被删除？");
+        }
         return Result.success(byId);
     }
 }
