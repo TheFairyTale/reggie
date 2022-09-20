@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  */
 @Component
 @Slf4j
-public class CommonEntityFieldAutoFillHandler implements MetaObjectHandler {
+public class EntityAutoFieldFillMetaObjectHandler implements MetaObjectHandler {
     /**
      * 插入数据时自动填充
      *
