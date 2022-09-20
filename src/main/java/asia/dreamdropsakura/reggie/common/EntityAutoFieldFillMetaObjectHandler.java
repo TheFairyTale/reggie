@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 public class EntityAutoFieldFillMetaObjectHandler implements MetaObjectHandler {
     /**
      * 插入数据时自动填充
+     * 插入操作：自动填充功能，拦截数据保存操作，获得你的原始对象，在insertFill 方法中修改元对象的数据
      *
      * @param metaObject
      */

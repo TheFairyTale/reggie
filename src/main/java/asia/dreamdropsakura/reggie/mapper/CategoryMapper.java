@@ -4,7 +4,7 @@ import asia.dreamdropsakura.reggie.entity.Category;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
- * 菜品与套餐分类管理数据库表映射类
+ * 菜系与套餐分类管理数据库表映射类
  *
  * @author 童话的爱
  * @since 2022-9-19
