@@ -27,12 +27,6 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @Autowired
-    private DishService dishService;
-
-    @Autowired
-    private SetmealService setMealService;
-
     /**
      * 分页获取所有套餐与菜系分类并按1排序规则排序、2分类排序、3名称依次排序
      *

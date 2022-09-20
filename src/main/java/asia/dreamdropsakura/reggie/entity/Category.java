@@ -33,8 +33,8 @@ public class Category implements Serializable {
     private String name;
 
     /**
-     * 顺序
-     *
+     * 顺序 -
+     * 该数值会影响客户点餐端的排序位置
      */
     private Integer sort;
 

@@ -59,6 +59,6 @@ public class CommonController {
         } catch (IOException e) {
             return Result.error(e.getMessage());
         }
-        return Result.success("图片上传成功");
+        return Result.success(newFileName);
     }
 }
