@@ -32,3 +32,12 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: ASSIGN_ID
+      # 逻辑删除字段名
+      logic-delete-field: deleted
+      # 逻辑删除字面值：未删除为0
+      logic-not-delete-value: 0
+      # 逻辑删除字面值：删除为1
+      logic-delete-value: 1
+# 定义CommonController 中所用的上传文件的存放路径
+reggie:
+  file-path: D:\Documents\Github\reggie\temp\
