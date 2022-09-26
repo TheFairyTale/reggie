@@ -1,0 +1,70 @@
+package asia.dreamdropsakura.reggie;
+
+import com.aliyun.dysmsapi20170525.models.SendSmsResponse;
+import com.aliyun.tea.TeaException;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.Random;
+
+/**
+ * 阿里云短信发送服务测试类
+ *
+ */
+@Slf4j
+@SpringBootTest
+public class AliyunSmsServiceInvokeTest {
+
+    /**
+     * 测试阿里云短信发送服务
+     *
+     * @throws Exception
+     */
+    public void testAliyunSmsService() throws Exception {
+        Random random = new Random();
+        int randomVerifyCode = random.nextInt(8999) + 1000;
+
+        com.aliyun.dysmsapi20170525.Client client = AliyunSmsServiceInvokeTest.createClient("", "");
+        com.aliyun.dysmsapi20170525.models.SendSmsRequest sendSmsRequest = new com.aliyun.dysmsapi20170525.models.SendSmsRequest()
+                .setSignName("阿里云短信测试")
+                .setTemplateCode("SMS_154950909")
+                .setPhoneNumbers("15600000000")
+                .setTemplateParam("{\"code\":" + randomVerifyCode + "}");
+        com.aliyun.teautil.models.RuntimeOptions runtime = new com.aliyun.teautil.models.RuntimeOptions();
+        try {
+            // 复制代码运行请自行打印 API 的返回值
+            SendSmsResponse sendSmsResponse = client.sendSmsWithOptions(sendSmsRequest, runtime);
+            log.info(sendSmsResponse.getBody().getMessage());
+            log.info("Sms has been send, code is " + randomVerifyCode);
+
+        } catch (TeaException error) {
+            // 如有需要，请打印 error
+            com.aliyun.teautil.Common.assertAsString(error.message);
+        } catch (Exception _error) {
+            TeaException error = new TeaException(_error.getMessage(), _error);
+            // 如有需要，请打印 error
+            com.aliyun.teautil.Common.assertAsString(error.message);
+        }
+    }
+
+    /**
+     * 使用AK&SK初始化账号Client
+     * 
+     * @param accessKeyId
+     * @param accessKeySecret
+     * @return Client
+     * @throws Exception
+     */
+    public static com.aliyun.dysmsapi20170525.Client createClient(String accessKeyId, String accessKeySecret)
+            throws Exception {
+        com.aliyun.teaopenapi.models.Config config = new com.aliyun.teaopenapi.models.Config()
+                // 您的 AccessKey ID
+                .setAccessKeyId(accessKeyId)
+                // 您的 AccessKey Secret
+                .setAccessKeySecret(accessKeySecret);
+        // 访问的域名
+        config.endpoint = "dysmsapi.aliyuncs.com";
+        return new com.aliyun.dysmsapi20170525.Client(config);
+    }
+}
