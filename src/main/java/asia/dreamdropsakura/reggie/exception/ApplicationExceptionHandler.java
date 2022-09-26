@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
@@ -35,6 +36,19 @@ public class ApplicationExceptionHandler {
     }*/
 
     /**
+     * 项目全局应用程序异常处理器
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(ApplicationException.class)
+    public Result applicationException(ApplicationException e) {
+        log.error("[ApplicationExceptionHandler]applicationException已捕获到错误:" + e.getLocalizedMessage());
+        e.printStackTrace();
+        return Result.error(e.getMessage());
+    }
+
+    /**
      * 全局SQL 异常处理器
      *
      * @param e
@@ -42,14 +56,17 @@ public class ApplicationExceptionHandler {
      */
     @ExceptionHandler(SQLException.class)
     public Result sqlExceptionHandler(SQLException e) {
+        String localizedMessage = e.getLocalizedMessage();
+        log.error("[ApplicationExceptionHandler]sqlExceptionHandler已捕获到错误:" + localizedMessage);
+        e.printStackTrace();
         String message = e.getMessage();
         if (message.contains("Duplicate entry")) {
-            String[] s = message.split(" ");
-            String s1 = s[2] + "已存在";
+            String[] s = message.split("'");
+            String s1 = "'" + s[1] + "'" + " 已存在";
             return Result.error(s1);
         }
         // exception.getMessage()
-        return Result.error("未知错误");
+        return Result.error("未知错误" + localizedMessage);
     }
 
     /**
@@ -60,6 +77,23 @@ public class ApplicationExceptionHandler {
      */
     @ExceptionHandler(CategoryException.class)
     public Result categoryExceptionHandler(CategoryException e) {
+        log.error("[ApplicationExceptionHandler]categoryExceptionHandler已捕获到错误:" + e.getLocalizedMessage());
+        e.printStackTrace();
         return Result.error(e.getMessage());
     }
+
+    /**
+     * 文件上传下载错误捕获
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(IOException.class)
+    public Result ioException(IOException e) {
+        log.error("[ApplicationExceptionHandler]ioException已捕获到错误:" + e.getLocalizedMessage());
+        e.printStackTrace();
+        return Result.error(e.getMessage());
+    }
+
+
 }
