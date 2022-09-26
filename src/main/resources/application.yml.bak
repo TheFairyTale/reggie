@@ -1,5 +1,9 @@
 server:
   port: 8080
+  # 设置Tomcat 应用服务器对文件大小的上传限制
+  tomcat:
+    # 默认2MB
+    max-http-form-post-size: 4MB
 spring:
   application:
     #应用的名称，可选
