@@ -13,6 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * 菜系与套餐分类管理相关控制器类
  *
@@ -34,7 +38,7 @@ public class CategoryController {
      * @param pageSize 每页记录数
      * @return
      */
-    @GetMapping("/page")
+    @GetMapping({"/page"})
     public Result<IPage> getCategories(int page, int pageSize) {
         // 分页构造器
         Page<Category> categoryPage = new Page<>(page, pageSize);
@@ -45,6 +49,23 @@ public class CategoryController {
         // 分页查询
         Page<Category> page1 = categoryService.page(categoryPage, categoryLambdaQueryWrapper);
         return Result.success(categoryPage);
+    }
+
+    /**
+     * 返回添加菜品(菜肴)页面所需的菜系选择下拉框所需的列表
+     *
+     * @return
+     */
+    @GetMapping({"/list"})
+    // get 请求的参数如果希望封装为一个实体类对象则不需要加注解
+    public Result<List<Category>> getCategoryList(Category category) {
+        // 条件构造器, 用于实现依据sort 字段进行数据的正序倒序排序
+        LambdaQueryWrapper<Category> categoryLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        // 添加排序条件，根据sort 字段按正序排序
+        categoryLambdaQueryWrapper.eq(category.getType() != null, Category::getType, category.getType()).orderByAsc(Category::getSort).orderByAsc(Category::getName);
+        // 列出所有内容
+        List<Category> list = categoryService.list(categoryLambdaQueryWrapper);
+        return Result.success(list);
     }
 
     /**
