@@ -179,7 +179,7 @@
             </el-form-item>
             <el-form-item label="套餐分类:" prop="idType">
               <el-select v-model="ruleForm.idType" placeholder="请选择套餐分类" @change="$forceUpdate()">
-                <el-option v-for="(item, index) in setMealList" :key="index" :label="item.name" :value="item.id" />
+                <el-option v-for="(item, index) in setmealList" :key="index" :label="item.name" :value="item.id" />
               </el-select>
             </el-form-item>
           </div>
@@ -373,7 +373,7 @@
             id: '',
             actionType: '',
             value: '',
-            setMealList: [],
+            setmealList: [],
             seachKey: '',
             dishList: [],
             imageUrl: '',
@@ -481,7 +481,7 @@
           getDishTypeList() {
             getCategoryList({ type: 2 }).then((res) => {
               if (res.code === 1) {
-                this.setMealList = res.data.map((obj) => ({ ...obj, idType: obj.id }))
+                this.setmealList = res.data.map((obj) => ({ ...obj, idType: obj.id }))
               } else {
                 this.$message.error(res.msg || '操作失败')
               }
