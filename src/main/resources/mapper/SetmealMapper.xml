@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="asia.dreamdropsakura.reggie.mapper.SetmealMapper">
+    <select id="selectWith" resultType="asia.dreamdropsakura.reggie.dto.SetmealDto">
+        select setmeal.*, category.name as category_name from setmeal left join category on setmeal.category_id = category.id
+        <where>
+            <!-- 此处#{name} 不需要加#{} 符号 -->
+            <if test="name != null">
+                setmeal.name like #{name} and
+            </if>
+            setmeal.is_deleted = 0
+        </where>
+        <!-- 根据菜肴所属菜系或套餐、或根据菜肴的添加日期、或根据菜肴名称排序。仅当前一位的排序相同时下一位才生效 -->
+        order by setmeal.category_id ASC, setmeal.create_time ASC, setmeal.name ASC limit #{startIndex},
+        #{pageSize}
+    </select>
+</mapper>
