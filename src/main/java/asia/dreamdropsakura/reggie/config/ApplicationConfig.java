@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class ApplicationConfig {
     /**
      * Mybatis-Plus 分页插件
+     * 该分页插件会拦截所有查询方法中带有IPage 对象的，改变底层执行的SQL，加上limit 语句
      *
      * @return
      */
