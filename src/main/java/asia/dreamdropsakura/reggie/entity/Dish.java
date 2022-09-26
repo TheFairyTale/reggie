@@ -2,6 +2,7 @@ package asia.dreamdropsakura.reggie.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -93,4 +94,11 @@ public class Dish implements Serializable {
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
+
+    /**
+     * 逻辑删除
+     *
+     */
+    @TableLogic
+    private Integer isDeleted;
 }
