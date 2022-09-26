@@ -79,7 +79,7 @@ public class EmployeeController {
     @PostMapping("/logout")
     public Result<String> logout(HttpServletRequest request) {
         // todo 前端不传值怎么知道要登出哪个用户？
-        request.getSession().getAttribute("employee");
+        request.getSession().removeAttribute("employee");
         return Result.success("登出成功.");
     }
 
@@ -90,7 +90,7 @@ public class EmployeeController {
      * @param servletRequest 为了获得当前登录的用户的session
      */
     @PostMapping
-    public Result<Employee> addEmployee(HttpServletRequest servletRequest , @RequestBody Employee employee) {
+    public Result addEmployee(HttpServletRequest servletRequest , @RequestBody Employee employee) {
         if (employee != null && employee.getUsername() != null) {
             // 设置新用户的初始密码
             employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
