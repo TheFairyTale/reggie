@@ -28,7 +28,18 @@
 		<dependency>
 			<groupId>com.baomidou</groupId>
 			<artifactId>mybatis-plus-boot-starter</artifactId>
-			<version>3.5.1</version>
+			<version>3.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.baomidou</groupId>
+			<artifactId>mybatis-plus-generator</artifactId>
+			<version>3.5.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.freemarker/freemarker -->
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>2.3.31</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.alibaba/druid-spring-boot-starter -->
 		<dependency>
@@ -52,6 +63,18 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+		<!-- 阿里云短信验证码依赖 -->
+		<dependency>
+			<groupId>com.aliyun</groupId>
+			<artifactId>tea-openapi</artifactId>
+			<version>0.2.5</version>
+		</dependency>
+		<!-- 阿里云OpenAPI短信验证码开发SDK -->
+		<dependency>
+			<groupId>com.aliyun</groupId>
+			<artifactId>dysmsapi20170525</artifactId>
+			<version>2.0.18</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
