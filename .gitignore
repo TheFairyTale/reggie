@@ -3,6 +3,7 @@ application.yml
 
 src/test/java/asia/dreamdropsakura/reggie/CodeGenerationPowerByMybatisPlusTest.java
 src/test/java/asia/dreamdropsakura/reggie/AliyunSmsServiceInvokeTest.java
+temp/*
 
 HELP.md
 target/
