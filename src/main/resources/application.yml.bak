@@ -14,6 +14,16 @@ spring:
       url: jdbc:mysql://:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
       username:
       password:
+  # 设置SpringMVC 的文件上传解析器对文件上传的大小限制
+  servlet:
+    multipart:
+      # 单文件最大
+      max-file-size: 4MB
+      # 整个请求数据的总大小
+      max-request-size: 10MB
+mybatis:
+  # 指定mapper.xml 的位置
+  mapper-locations: classpath:mapper/*.xml
 mybatis-plus:
   configuration:
     #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
