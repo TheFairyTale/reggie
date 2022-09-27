@@ -81,34 +81,40 @@ public class LoginCheckFilter implements Filter {
         }
 
         // 判断请求是否携带有指定的session 对象
-        // todo 当你登录后台后，再去登录前台，同一个拦截器中写的两个根据session 来判断是否登录的逻辑，谁先第一个匹配谁就通过！
-        //  如已登录后台再登前台，就会判断为已登陆。因为 无论前还是后台拦截器先判断后台session 是否存在再判断前台。
-        //  好好判断排查下你前台用户登录逻辑很有可能写错了，想清楚放什么数据进线程共享数据池中。
-        if (httpServletRequest.getSession().getAttribute("employee") != null) {
-            // 如果有登录后台
+        // 判断用户是要访问前台还是后台
+        if (httpServletRequest.getRequestURI().contains("employee") || httpServletRequest.getRequestURI().contains("backend") || httpServletRequest.getSession().getAttribute("employee") != null) {
+            // 后端
+            if (httpServletRequest.getSession().getAttribute("employee") != null) {
+                // 如果有登录后台
 
-            // 设置线程变量. 这行代码不可以写在if 外面，只有在确认请求确实携带有employee session 时才继续
-            long employee = (Long) httpServletRequest.getSession().getAttribute("employee");
-            log.info("[doFilter]有后台用户登录：" + employee);
-            LocalThreadVariablePoolUtil.setCurrentThreadUserid(employee);
+                // 设置线程变量. 这行代码不可以写在if 外面，只有在确认请求确实携带有employee session 时才继续
+                long employee = (Long) httpServletRequest.getSession().getAttribute("employee");
+                log.info("[doFilter]有后台用户登录：" + employee);
+                LocalThreadVariablePoolUtil.setCurrentThreadUserid(employee);
 
-            //System.out.println("用户已经登录" + httpServletRequest.getSession().getAttribute("employee"));
-            filterChain.doFilter(servletRequest, servletResponse);
-            return;
+                //System.out.println("用户已经登录" + httpServletRequest.getSession().getAttribute("employee"));
+                filterChain.doFilter(servletRequest, servletResponse);
+                return;
+            }
+
+        } else {
+            // 前端
+            if (httpServletRequest.getSession().getAttribute("user") != null) {
+                // 如果有登录前端
+
+                // 获取session 中的用户表主键ID，并将其设置到全局变量中
+                String user = String.valueOf(httpServletRequest.getSession().getAttribute("user"));
+                log.info("[doFilter]有前台用户登录：" + user);
+                LocalThreadVariablePoolUtil.setCurrentThreadUserid(Long.parseLong(user));
+
+                filterChain.doFilter(servletRequest, servletResponse);
+                return;
+            }
+
+            // 如果没有登录
+            // 有时会报错 java.lang.IllegalStateException: getOutputStream() has already been called for this response
+            httpServletResponse.getWriter().write(objectMapper.writeValueAsString(Result.error("NOTLOGIN")));
         }
-        if (httpServletRequest.getSession().getAttribute("user") != null) {
-            // 如果有登录前端
-
-            String user = String.valueOf(httpServletRequest.getSession().getAttribute("user"));
-            log.info("[doFilter]有前台用户登录：" + user);
-            LocalThreadVariablePoolUtil.setCurrentThreadUserid(Long.parseLong(user));
-
-            filterChain.doFilter(servletRequest, servletResponse);
-        }
-
-        // 如果没有登录
-        // 有时会报错 java.lang.IllegalStateException: getOutputStream() has already been called for this response
-        httpServletResponse.getWriter().write(objectMapper.writeValueAsString(Result.error("NOTLOGIN")));
     }
 
     @Override
