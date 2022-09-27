@@ -81,6 +81,9 @@ public class LoginCheckFilter implements Filter {
         }
 
         // 判断请求是否携带有指定的session 对象
+        // todo 当你登录后台后，再去登录前台，同一个拦截器中写的两个根据session 来判断是否登录的逻辑，谁先第一个匹配谁就通过！
+        //  如已登录后台再登前台，就会判断为已登陆。因为 无论前还是后台拦截器先判断后台session 是否存在再判断前台。
+        //  好好判断排查下你前台用户登录逻辑很有可能写错了，想清楚放什么数据进线程共享数据池中。
         if (httpServletRequest.getSession().getAttribute("employee") != null) {
             // 如果有登录后台
 
@@ -92,7 +95,8 @@ public class LoginCheckFilter implements Filter {
             //System.out.println("用户已经登录" + httpServletRequest.getSession().getAttribute("employee"));
             filterChain.doFilter(servletRequest, servletResponse);
             return;
-        } else if (httpServletRequest.getSession().getAttribute("user") != null) {
+        }
+        if (httpServletRequest.getSession().getAttribute("user") != null) {
             // 如果有登录前端
 
             String user = String.valueOf(httpServletRequest.getSession().getAttribute("user"));

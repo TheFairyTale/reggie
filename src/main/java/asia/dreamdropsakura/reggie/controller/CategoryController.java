@@ -65,6 +65,15 @@ public class CategoryController {
         categoryLambdaQueryWrapper.eq(category.getType() != null, Category::getType, category.getType()).orderByAsc(Category::getSort).orderByAsc(Category::getName);
         // 列出所有内容
         List<Category> list = categoryService.list(categoryLambdaQueryWrapper);
+
+        /*log.warn("sql result: ");
+        log.warn(list.toString());*/
+
+        /*List<Category> categories = new ArrayList<>();
+        Category studentCategory = new Category();
+        studentCategory.setName("套餐");
+        studentCategory.setId(1573617588406702081L);
+        categories.add(studentCategory);*/
         return Result.success(list);
     }
 
