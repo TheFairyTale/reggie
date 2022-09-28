@@ -13,11 +13,18 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 菜肴相关控制器类
@@ -145,13 +152,15 @@ public class DishController {
     }
 
     /**
-     * 获取菜肴表中指定categoryId 的所有菜肴
+     * 获取菜肴表中指定categoryId 的所有菜肴, 另外一并获取单个菜肴所对应的口味，并将其封装到DishDto 对象中
+     * todo 涉及到的数据库查询操作过多（查询请求在for 循环当中），速度较慢，需要优化
+     *  应返回确切对象类型而不是Object
      *
      * @param categoryId 套餐或菜系id
      * @return
      */
     @GetMapping("/list")
-    public Result<List<Dish>> getSetmealDishesOrDishesBycategoryId(@RequestParam Long categoryId) {
+    public Result<Object> getSetmealDishesOrDishesBycategoryId(@RequestParam Long categoryId) {
         if (categoryId != null) {
             // 由于在category 表中，有的分类记录为套餐（type 字段为2），有的是菜系（type为1），
             // 故这里如果传入一个是菜系的分类记录id 则获得的是该菜系下的所有菜肴
@@ -159,7 +168,25 @@ public class DishController {
             // 在分类表中，里面的套餐与菜系是用于用户界面展示的分类用的，其都不代表某个具体的菜肴或套餐。（如某某菜系中包含有真正的菜肴，那些菜肴
             // 才是用户要吃的东西；而某某套餐并不直接是一个套餐，它只是一个分类，例如有儿童套餐分类，也有活动套餐分类，每个分类下才有各个不同儿童
             // 或不同活动所对应的套餐，这些套餐才是用户要点餐吃的东西。）
-            return Result.success(dishService.list(new LambdaQueryWrapper<Dish>().eq(Dish::getCategoryId, categoryId)));
+
+            // 先按指定id 获取所有的菜肴
+            List<Dish> listDishesById = dishService.list(new LambdaQueryWrapper<Dish>().eq(Dish::getCategoryId, categoryId));
+
+            // 然后使用stream 流，挨个看每个dish 菜肴对象的id，拿着id 去dishFlavor菜肴口味表找该id 的菜品所对应的口味
+            Stream<Dish> stream = listDishesById.stream();
+            List<Object> collect = stream.map((Function<Dish, Object>) dish -> {
+                // 根据指定菜肴id 查找所属的口味
+                Long dishId = dish.getId();
+                List<DishFlavor> list = dishFlavorService.list(new LambdaQueryWrapper<DishFlavor>().eq(DishFlavor::getDishId, dishId));
+                // 将DishFlavor 菜肴口味与Dish 菜肴封装在一起
+                DishDto dishDto = new DishDto();
+                BeanUtils.copyProperties(dish, dishDto);
+                dishDto.setFlavors(list);
+                // 然后返回封装好的DishDto 对象，这是前端需要的对象，前端遍历列表中的每一个dishDto ，然后获取数据
+                return dishDto;
+            }).collect(Collectors.toList());
+
+            return Result.success(collect);
         }
         return Result.error("id参数不能为空");
     }
