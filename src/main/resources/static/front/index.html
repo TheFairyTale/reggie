@@ -587,14 +587,26 @@
         //先清除对象数据，如果不行的话dialog使用v-if
         this.detailsDialog.item = {}
         this.setMealDialog.item = {}
+        console.warn("[要进if 了哟!] ")
+        console.log("[front/index.html]Line590 => ")
+        console.log(item)
+        console.warn("[要出if 了哟!] ")
         if (Array.isArray(item.flavors)) {
           this.detailsDialog.item = item
+
+          console.error("[front/index.html]Line593 => ")
+          console.warn(item)
+
           this.detailsDialog.show = true
         } else {
           //显示套餐的数据
           const res = await setMealDishDetailsApi(item.id)
+          console.warn("[JSON.stringify]Line601 => can can res: ")
           console.log(JSON.stringify(res))
           if (res.code === 1) {
+            console.warn("[front/index.html]Line601 => can can res: ")
+            console.log(res)
+
             this.setMealDialog.item = { ...item, list: res.data.setmealDishes }
             console.log(JSON.stringify(this.setMealDialog.item))
             this.setMealDialog.show = true
