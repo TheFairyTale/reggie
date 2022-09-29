@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8120
   # 设置Tomcat 应用服务器对文件大小的上传限制
   tomcat:
     # 默认2MB
