@@ -154,13 +154,12 @@ public class DishController {
     /**
      * 获取菜肴表中指定categoryId 的所有菜肴, 另外一并获取单个菜肴所对应的口味，并将其封装到DishDto 对象中
      * todo 涉及到的数据库查询操作过多（查询请求在for 循环当中），速度较慢，需要优化
-     *  应返回确切对象类型而不是Object
      *
      * @param categoryId 套餐或菜系id
      * @return
      */
     @GetMapping("/list")
-    public Result<Object> getSetmealDishesOrDishesBycategoryId(@RequestParam Long categoryId) {
+    public Result<List<DishDto>> getSetmealDishesOrDishesBycategoryId(@RequestParam Long categoryId) {
         if (categoryId != null) {
             // 由于在category 表中，有的分类记录为套餐（type 字段为2），有的是菜系（type为1），
             // 故这里如果传入一个是菜系的分类记录id 则获得的是该菜系下的所有菜肴
@@ -174,7 +173,7 @@ public class DishController {
 
             // 然后使用stream 流，挨个看每个dish 菜肴对象的id，拿着id 去dishFlavor菜肴口味表找该id 的菜品所对应的口味
             Stream<Dish> stream = listDishesById.stream();
-            List<Object> collect = stream.map((Function<Dish, Object>) dish -> {
+            List<DishDto> collect = stream.map((Function<Dish, DishDto>) dish -> {
                 // 根据指定菜肴id 查找所属的口味
                 Long dishId = dish.getId();
                 List<DishFlavor> list = dishFlavorService.list(new LambdaQueryWrapper<DishFlavor>().eq(DishFlavor::getDishId, dishId));
