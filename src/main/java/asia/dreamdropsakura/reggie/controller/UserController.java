@@ -89,9 +89,8 @@ public class UserController {
                     // 0 禁用，1 正常
                     one.setStatus(1);
                     boolean save = userService.save(one);
-
                 }
-                // 如果获取的User 对象不为空, 则登录成功
+                // 如果获取的User 对象不为空, 则登录成功, 将用户记录表的主键id存入
                 session.setAttribute("user", one.getId());
                 return Result.success("登录成功");
             } else {
