@@ -83,6 +83,13 @@ public class ShoppingCart implements Serializable {
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
+    /**
+     * 更新时间
+     *
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+
     public Long getId() {
         return id;
     }
@@ -153,6 +160,8 @@ public class ShoppingCart implements Serializable {
     public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
     }
+
+
 
     @Override
     public String toString() {
