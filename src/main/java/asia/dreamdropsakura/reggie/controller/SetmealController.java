@@ -1,14 +1,19 @@
 package asia.dreamdropsakura.reggie.controller;
 
 import asia.dreamdropsakura.reggie.common.Result;
+import asia.dreamdropsakura.reggie.dto.DishDto;
 import asia.dreamdropsakura.reggie.dto.SetmealDto;
 import asia.dreamdropsakura.reggie.entity.Dish;
+import asia.dreamdropsakura.reggie.entity.DishFlavor;
 import asia.dreamdropsakura.reggie.entity.Setmeal;
 import asia.dreamdropsakura.reggie.entity.SetmealDish;
+import asia.dreamdropsakura.reggie.service.DishFlavorService;
+import asia.dreamdropsakura.reggie.service.DishService;
 import asia.dreamdropsakura.reggie.service.SetmealDishService;
 import asia.dreamdropsakura.reggie.service.SetmealService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +27,7 @@ import java.util.Set;
  * @author 童话的爱
  * @since 2022-9-20
  */
+@Slf4j
 @RestController
 @RequestMapping("/setmeal")
 public class SetmealController {
@@ -31,6 +37,12 @@ public class SetmealController {
 
     @Autowired
     private SetmealDishService setmealDishService;
+
+    @Autowired
+    private DishService dishService;
+
+    @Autowired
+    private DishFlavorService dishFlavorService;
 
     /**
      * 分页获取套餐管理列表
@@ -46,6 +58,23 @@ public class SetmealController {
             return Result.success(setmealService.paginationSetmeals(page, pageSize, name));
         }
         return Result.error("当前记录数与每页记录数不能小于1或不可为空");
+    }
+
+    /**
+     * 获取所有套餐
+     *
+     * @param categoryId
+     * @param status
+     * @return
+     */
+    @GetMapping("/list")
+    public Result<List<Setmeal>> listAllSetmeal(@RequestParam Long categoryId, @RequestParam Integer status) {
+        if (categoryId != null && status != null) {
+            List<Setmeal> list = setmealService.list(new LambdaQueryWrapper<Setmeal>().eq(Setmeal::getCategoryId, categoryId).eq(Setmeal::getStatus, status));
+            return Result.success(list);
+        }
+
+        return Result.error("无法查询指定的套餐信息，套餐id 或状态为空");
     }
 
     /**
@@ -106,6 +135,8 @@ public class SetmealController {
     public Result<String> deleteSetmeals(@RequestParam List<Long> ids) {
         if (ids != null || ids.size() != 0) {
             if (setmealService.deleteByIds(ids)) {
+                // 删除套餐对应的菜肴
+                boolean remove = setmealDishService.remove(new LambdaQueryWrapper<SetmealDish>().in(SetmealDish::getSetmealId, ids));
                 return Result.success("删除成功");
             }
             return Result.error("删除出错，套餐仍在售卖中或套餐已被删除");
@@ -131,5 +162,41 @@ public class SetmealController {
             return Result.success("成功更改售卖状态");
         }
         return Result.error("请选择需要修改售卖状态的套餐");
+    }
+
+    /**
+     * 根据指定菜肴的id 获取菜肴所属口味
+     *
+     * todo 该方法执行时共发起了4次数据库查询请求。
+     *  可以优化
+     *
+     * @param id 菜肴id(dish表中的主键id)
+     * @return SetmealDto 或DishDto
+     */
+    @GetMapping("/dish/{id}")
+    public Result<Object> getDishFlavorsOrSetmealDishesById(@PathVariable Long id) {
+        if (id != null) {
+            // 先查套餐中是否存在指定主键id 的记录
+            Setmeal setmealRecord = setmealService.getOne(new LambdaQueryWrapper<Setmeal>().eq(Setmeal::getId, id));
+            // 再查菜肴表中有没有指定主键id 的菜品
+            Dish dishRecord = dishService.getOne(new LambdaQueryWrapper<Dish>().eq(Dish::getId, id));
+
+            SetmealDto setmealDto = new SetmealDto();
+            DishDto dishDto = new DishDto();
+            if (setmealRecord != null) {
+                // 当该id 表示为一个套餐时，获取套餐所属所有菜肴
+                setmealDto.setSetmealDishes(setmealDishService.list(new LambdaQueryWrapper<SetmealDish>().in(SetmealDish::getSetmealId, id)));
+                return Result.success(setmealDto);
+            } else if (dishRecord != null) {
+                // 当该id 表示为一个菜肴时, 获取菜肴所属所有口味
+                dishDto.setFlavors(dishFlavorService.list(new LambdaQueryWrapper<DishFlavor>().in(DishFlavor::getDishId, id)));
+                return Result.success(dishDto);
+            } else {
+                // 如果都为空
+                return Result.error("无法找到指定的菜肴或套餐的信息");
+            }
+        }
+
+        return Result.error("无法获取菜肴的口味信息，菜肴id 不能为空");
     }
 }
