@@ -8,6 +8,7 @@ import asia.dreamdropsakura.reggie.util.ValidateCodeUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 /**
@@ -34,6 +36,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
+
     /**
      * 获取验证码功能
      *
@@ -45,11 +50,21 @@ public class UserController {
         if (user != null) {
             HttpSession session = httpServletRequest.getSession();
 
-            String verifyCode = ValidateCodeUtils.generateValidateCode(4).toString();
-            session.setAttribute(user.getPhone(), verifyCode);
+            String verifyCode = null;
+            //session.setAttribute(user.getPhone(), verifyCode);
+
+            // 将verify Code 存入redis
+            Object o = redisTemplate.opsForValue().get(user.getPhone());
+            if (o == null) {
+                verifyCode = ValidateCodeUtils.generateValidateCode(4).toString();
+                redisTemplate.opsForValue().set(user.getPhone(), verifyCode, 10, TimeUnit.MINUTES);
+            } else {
+                verifyCode = (String) o;
+            }
+
             log.info("Current thread user " + LocalThreadVariablePoolUtil.getCurrentThreadUserid() + " - " + user.getPhone() + "'s verify code is {}", verifyCode);
 
-            return Result.success(verifyCode);
+            return Result.success("");
         }
         return Result.error("电话号码为空。");
     }
@@ -70,15 +85,17 @@ public class UserController {
             // todo 复习类型转换知识点
             //  对于登录和注册你还不熟悉
             HttpSession session = httpServletRequest.getSession();
-            //获取手机号
+            // 获取手机号
             String phone = mapParams.get("phone").toString();
-            //获取验证码
+            // 获取验证码
             String code = mapParams.get("code").toString();
-            //从Session中获取保存的验证码
-            Object inSessionVerifyCode = session.getAttribute(phone);
+            // 从Session中获取保存的验证码
+            //Object inSessionVerifyCode = session.getAttribute(phone);
+            // 从Redis 中获取保存的验证码
+            Object inSessionVerifyCode = redisTemplate.opsForValue().get(phone);
 
             // 判断验证码是否正确
-            if (inSessionVerifyCode != null && inSessionVerifyCode.equals(code)) {
+            if (inSessionVerifyCode != null && ((String) inSessionVerifyCode).equals(code)) {
                 // 如果验证码正确, 开始根据手机号判断有没有这个用户
                 User one = userService.getOne(new LambdaQueryWrapper<User>().eq(User::getPhone, phone));
 
@@ -106,7 +123,7 @@ public class UserController {
      *
      * @return
      */
-    @GetMapping
+    @PostMapping("/loginout")
     public Result<String> logout(HttpServletRequest httpServletRequest) {
         httpServletRequest.getSession().removeAttribute("user");
         return Result.success("已登出");
