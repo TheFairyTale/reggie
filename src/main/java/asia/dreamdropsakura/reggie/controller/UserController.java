@@ -111,7 +111,7 @@ public class UserController {
                 session.setAttribute("user", one.getId());
                 return Result.success("登录成功");
             } else {
-                return Result.error("验证码不正确");
+                return Result.error("验证码不正确，请重新获取验证码");
             }
         }
 
