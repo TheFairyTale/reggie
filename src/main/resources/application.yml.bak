@@ -19,10 +19,10 @@ spring:
       port:
       password:
       database: 0
-   cache:
-     redis:
-       # 设置缓存过期时间 可选的
-       time-to-live: 1800000
+  cache:
+    redis:
+      # 设置缓存过期时间 可选的
+      time-to-live: 1800000
   # 设置SpringMVC 的文件上传解析器对文件上传的大小限制
   servlet:
     multipart:
