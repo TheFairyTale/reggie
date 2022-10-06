@@ -2,10 +2,13 @@ package asia.dreamdropsakura.reggie;
 
 import asia.dreamdropsakura.reggie.dto.DishDto;
 import asia.dreamdropsakura.reggie.entity.DishFlavor;
+import asia.dreamdropsakura.reggie.entity.ShoppingCart;
 import asia.dreamdropsakura.reggie.mapper.DishFlavorMapper;
 import asia.dreamdropsakura.reggie.mapper.DishMapper;
 import asia.dreamdropsakura.reggie.service.DishFlavorService;
 import asia.dreamdropsakura.reggie.service.DishService;
+import asia.dreamdropsakura.reggie.service.ShoppingCartService;
+import asia.dreamdropsakura.reggie.util.LocalThreadVariablePoolUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -15,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @SpringBootTest
 class ReggieTakeoutApplicationTests {
@@ -30,6 +34,9 @@ class ReggieTakeoutApplicationTests {
 
 	@Autowired
 	private DishFlavorMapper dishFlavorMapper;
+
+	@Autowired
+	private ShoppingCartService shoppingCartService;
 
 	@Test
 	void contextLoads() {
@@ -72,5 +79,12 @@ class ReggieTakeoutApplicationTests {
 		int i = dishMapper.deleteBatchIds(ids);
 		boolean remove = dishFlavorService.remove(new LambdaQueryWrapper<DishFlavor>().in(DishFlavor::getDishId, ids));
 
+	}
+
+	@Test
+	public void testQueryAllDishesAndSetmealsByUserId() {
+		// 查询该用户id 下的所有菜品或套餐
+		List<ShoppingCart> list = shoppingCartService.list(new LambdaQueryWrapper<ShoppingCart>().eq(ShoppingCart::getUserId, 1573945728316334082L));
+		System.out.println(list);
 	}
 }
