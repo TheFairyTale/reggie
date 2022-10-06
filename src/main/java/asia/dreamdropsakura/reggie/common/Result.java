@@ -70,16 +70,13 @@ public class Result<T> implements Serializable {
     /**
      * 返回成功对象
      *
-     * @param msg
-     * @return
-     * @param <T>
      */
-    public static <T> Result<T> success(String msg) {
+    /*public static <T> Result<T> success(String msg) {
         Result<T> r = new Result<>();
         r.msg = msg;
         r.code = 1;
         return r;
-    }
+    }*/
 
     public Result<T> add(String key, Object value) {
         this.map.put(key, value);
