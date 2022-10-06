@@ -96,6 +96,8 @@ public class UserController {
 
             // 判断验证码是否正确
             if (inSessionVerifyCode != null && ((String) inSessionVerifyCode).equals(code)) {
+                // 验证码验证正确后，删除该验证码
+                redisTemplate.delete(phone);
                 // 如果验证码正确, 开始根据手机号判断有没有这个用户
                 User one = userService.getOne(new LambdaQueryWrapper<User>().eq(User::getPhone, phone));
 
