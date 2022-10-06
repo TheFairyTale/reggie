@@ -14,6 +14,11 @@ spring:
       url: jdbc:mysql://:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
       username:
       password:
+  redis:
+      host:
+      port:
+      password:
+      database: 0
   # 设置SpringMVC 的文件上传解析器对文件上传的大小限制
   servlet:
     multipart:
