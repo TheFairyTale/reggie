@@ -37,7 +37,7 @@ public class CommonController {
      * @param file 上传来的文件 这个文件是一个临时文件，如果不转存到其他地方，则本次请求完成后该临时文件会被删除
      */
     @PostMapping("/upload")
-    public Result uploadFiles(MultipartFile file) {
+    public Result<String> uploadFiles(MultipartFile file) {
         if (file.isEmpty()) {
             return Result.error("传入的内容是空的");
         }
