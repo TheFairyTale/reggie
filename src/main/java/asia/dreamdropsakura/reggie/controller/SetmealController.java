@@ -15,11 +15,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * 套餐相关控制器类
@@ -43,6 +43,9 @@ public class SetmealController {
 
     @Autowired
     private DishFlavorService dishFlavorService;
+
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
 
     /**
      * 分页获取套餐管理列表
@@ -70,7 +73,22 @@ public class SetmealController {
     @GetMapping("/list")
     public Result<List<Setmeal>> listAllSetmeal(@RequestParam Long categoryId, @RequestParam Integer status) {
         if (categoryId != null && status != null) {
-            List<Setmeal> list = setmealService.list(new LambdaQueryWrapper<Setmeal>().eq(Setmeal::getCategoryId, categoryId).eq(Setmeal::getStatus, status));
+            List<Setmeal> list = null;
+
+            log.warn("检查缓存中...");
+            // 判断缓存中是否已有指定id 对应的所有已启售菜肴
+            Object setmeal = redisTemplate.opsForHash().get("setmeal", "setmeal_" + categoryId);
+            if (setmeal == null) {
+                log.warn("查询setmeal下的setmeal_" + categoryId + "为空或不存在");
+
+                list = setmealService.list(new LambdaQueryWrapper<Setmeal>().eq(Setmeal::getCategoryId, categoryId).eq(Setmeal::getStatus, status).orderByDesc(Setmeal::getUpdateTime));
+                // 将封装好的，包含Dish 和DishFlavors 的DishDtoList 列表放入缓存中.
+                redisTemplate.opsForHash().put("setmeal", "setmeal_" + categoryId, list);
+            } else {
+                log.warn("setmeal下的setmeal_" + categoryId + "存在");
+                list = (List<Setmeal>) setmeal;
+            }
+
             return Result.success(list);
         }
 
@@ -101,6 +119,10 @@ public class SetmealController {
     public Result<String> modifySetmeal(@RequestBody SetmealDto setmealDto) {
         if (setmealDto != null) {
             if (setmealService.updateSetmeal(setmealDto)) {
+                // 更新菜品时清除所有相关联的缓存
+                // todo (redisTemplate)每个新增、删除、修改 的方法都需要在相同逻辑后加相同的清除代码，AOP可以实现吗
+                Boolean hasDeleted = redisTemplate.delete("setmeal");
+                log.info(hasDeleted != null ? hasDeleted ? "[modifySetmeal]已删除缓存数据" : "删除时出现问题" : "删除时出现问题");
                 return Result.success("更新成功");
             }
             return Result.error("一个或多个信息更新失败，请重试");
@@ -116,8 +138,12 @@ public class SetmealController {
      */
     @PostMapping
     public Result<String> addSetmeal(@RequestBody SetmealDto setmealDto) {
-        if (setmealDto != null ) {
+        if (setmealDto != null) {
             if (setmealService.addSetmeal(setmealDto)) {
+                // 更新菜品时清除所有相关联的缓存
+                // todo (redisTemplate)每个新增、删除、修改 的方法都需要在相同逻辑后加相同的清除代码，AOP可以实现吗
+                Boolean hasDeleted = redisTemplate.delete("setmeal");
+                log.info(hasDeleted != null ? hasDeleted ? "[addSetmeal]已删除缓存数据" : "删除时出现问题" : "删除时出现问题");
                 return Result.success("添加成功");
             }
             return Result.error("添加时出现问题，一个或多个添加操作未成功");
@@ -137,6 +163,10 @@ public class SetmealController {
             if (setmealService.deleteByIds(ids)) {
                 // 删除套餐对应的菜肴
                 boolean remove = setmealDishService.remove(new LambdaQueryWrapper<SetmealDish>().in(SetmealDish::getSetmealId, ids));
+                // 更新菜品时清除所有相关联的缓存
+                // todo (redisTemplate)每个新增、删除、修改 的方法都需要在相同逻辑后加相同的清除代码，AOP可以实现吗
+                Boolean hasDeleted = redisTemplate.delete("setmeal");
+                log.info(hasDeleted != null ? hasDeleted ? "[deleteSetmeals]已删除缓存数据" : "删除时出现问题" : "删除时出现问题");
                 return Result.success("删除成功");
             }
             return Result.error("删除出错，套餐仍在售卖中或套餐已被删除");
@@ -159,6 +189,10 @@ public class SetmealController {
             // 该代码将会使mp 生成如下SQL 语句
             // UPDATE setmeal SET status=?, update_time=?, update_user=? WHERE is_deleted=0 AND (id IN (?,?,?,?,?,?,?,?,?,?))
             boolean update = setmealService.update(setmeal, new LambdaQueryWrapper<Setmeal>().in(Setmeal::getId, ids).select(Setmeal::getStatus));
+            // 更新菜品时清除所有相关联的缓存
+            // todo (redisTemplate)每个新增、删除、修改 的方法都需要在相同逻辑后加相同的清除代码，AOP可以实现吗
+            Boolean hasDeleted = redisTemplate.delete("setmeal");
+            log.info(hasDeleted != null ? hasDeleted ? "[modifySetmealStatusByIds]已删除缓存数据" : "删除时出现问题" : "删除时出现问题");
             return Result.success("成功更改售卖状态");
         }
         return Result.error("请选择需要修改售卖状态的套餐");
@@ -166,7 +200,7 @@ public class SetmealController {
 
     /**
      * 根据指定菜肴的id 获取菜肴所属口味
-     *
+     * <p>
      * todo 该方法执行时共发起了4次数据库查询请求。
      *  可以优化
      *

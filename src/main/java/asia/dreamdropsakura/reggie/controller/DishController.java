@@ -15,6 +15,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +46,9 @@ public class DishController {
     @Autowired
     private DishFlavorService dishFlavorService;
 
+    @Autowired
+    private RedisTemplate<Object, Object> redisTemplate;
+
     /**
      * 分页获取所有菜肴
      *
@@ -50,7 +56,7 @@ public class DishController {
      * @param pageSize 每页记录数
      * @return
      */
-    @GetMapping("page")
+    @GetMapping("/page")
     public Result<IPage> getDishes(int page, int pageSize, String name) {
         /*
         // 分页构造器
@@ -81,6 +87,10 @@ public class DishController {
     public Result<String> addDish(@RequestBody DishDto dishDto) {
         if (dishDto != null) {
             boolean b = dishService.saveWithFlavor(dishDto);
+            // 更新菜品时清除所有相关联的缓存
+            // todo (redisTemplate)每个新增、删除、修改 的方法都需要在相同逻辑后加相同的清除代码，AOP可以实现吗
+            Boolean hasDeleted = redisTemplate.delete("dish");
+            log.info(hasDeleted != null ? hasDeleted ? "[addDish]已删除缓存数据" : "删除时出现问题" : "删除时出现问题");
             return Result.success("添加成功");
         }
         return Result.error("菜肴数据为空，请检查值是否都已填写完毕");
@@ -96,6 +106,10 @@ public class DishController {
     public Result<String> modifyDish(@RequestBody DishDto dishDto) {
         if (dishDto != null) {
             boolean b = dishService.saveWithFlavorById(dishDto);
+            // 更新菜品时清除所有相关联的缓存
+            // todo (redisTemplate)每个新增、删除、修改 的方法都需要在相同逻辑后加相同的清除代码，AOP可以实现吗
+            Boolean hasDeleted = redisTemplate.delete("dish");
+            log.info(hasDeleted != null ? hasDeleted ? "[modifyDish]已删除缓存数据" : "删除时出现问题" : "删除时出现问题");
             return Result.success("修改成功");
         }
         return Result.error("菜肴数据为空，请检查值是否都已填写完毕");
@@ -124,6 +138,10 @@ public class DishController {
     public Result<String> deleteDishes(@RequestParam List<Long> ids) {
         if (ids != null || ids.size() != 0) {
             boolean b = dishService.deleteByIds(ids);
+            // 更新菜品时清除所有相关联的缓存
+            // todo (redisTemplate)每个新增、删除、修改 的方法都需要在相同逻辑后加相同的清除代码，AOP可以实现吗
+            Boolean hasDeleted = redisTemplate.delete("dish");
+            log.info(hasDeleted != null ? hasDeleted ? "[deleteDishes]已删除缓存数据" : "删除时出现问题" : "删除时出现问题");
             return Result.success("删除成功");
         }
         return Result.error("请选择需要删除的菜肴");
@@ -132,7 +150,6 @@ public class DishController {
     /**
      * 更改一个或多个菜肴的售卖状态，0为停售，1为启售
      *
-     * todo 关于下面这些文档注释，格式应该怎么写？
      * @param ids
      * @param status
      * @return
@@ -144,16 +161,18 @@ public class DishController {
             dish.setStatus(status);
             // 该代码将会使mp 生成如下SQL 语句
             // UPDATE dish SET status=?, update_time=?, update_user=? WHERE is_deleted=0 AND (id IN (?,?,?,?,?,?,?,?,?,?))
-            // todo 像上面的代码一样，业务层操作完成后的返回值是否需要接收？
             boolean update = dishService.update(dish, new LambdaQueryWrapper<Dish>().in(Dish::getId, ids).select(Dish::getStatus));
-            return Result.success("成功更改售卖状态");
+            // 更新菜品时清除所有相关联的缓存
+            // todo (redisTemplate)每个新增、删除、修改 的方法都需要在相同逻辑后加相同的清除代码，AOP可以实现吗
+            Boolean hasDeleted = redisTemplate.delete("dish");
+            log.info(hasDeleted != null ? hasDeleted ? "[modifyDishesStatusByIds]已删除缓存数据" : "删除时出现问题" : "删除时出现问题");
+            return Result.success("成功更改菜品售卖状态");
         }
         return Result.error("请选择需要修改售卖状态的菜肴");
     }
 
     /**
      * 获取菜肴表中指定categoryId 的所有菜肴, 另外一并获取单个菜肴所对应的口味，并将其封装到DishDto 对象中
-     * todo 涉及到的数据库查询操作过多（查询请求在for 循环当中），速度较慢，需要优化
      *
      * @param categoryId 套餐或菜系id
      * @return
@@ -168,23 +187,35 @@ public class DishController {
             // 才是用户要吃的东西；而某某套餐并不直接是一个套餐，它只是一个分类，例如有儿童套餐分类，也有活动套餐分类，每个分类下才有各个不同儿童
             // 或不同活动所对应的套餐，这些套餐才是用户要点餐吃的东西。）
 
-            // 先按指定id 获取所有的菜肴
-            List<Dish> listDishesById = dishService.list(new LambdaQueryWrapper<Dish>().eq(Dish::getCategoryId, categoryId));
+            List<DishDto> collect = null;
+            log.warn("检查缓存中...");
+            // 判断缓存中是否已有指定id 对应的所有已启售菜肴
+            Object dish1 = redisTemplate.opsForHash().get("dish", "dish_" + categoryId);
+            if (dish1 == null) {
+                log.warn("查询dish下的dish_" + categoryId + "为空或不存在");
+                // 先按指定id 获取所有的已启售菜肴
+                List<Dish> listDishesById = dishService.list(new LambdaQueryWrapper<Dish>().eq(Dish::getCategoryId, categoryId).eq(Dish::getStatus, 1));
 
-            // 然后使用stream 流，挨个看每个dish 菜肴对象的id，拿着id 去dishFlavor菜肴口味表找该id 的菜品所对应的口味
-            Stream<Dish> stream = listDishesById.stream();
-            List<DishDto> collect = stream.map((Function<Dish, DishDto>) dish -> {
-                // 根据指定菜肴id 查找所属的口味
-                Long dishId = dish.getId();
-                List<DishFlavor> list = dishFlavorService.list(new LambdaQueryWrapper<DishFlavor>().eq(DishFlavor::getDishId, dishId));
-                // 将DishFlavor 菜肴口味与Dish 菜肴封装在一起
-                DishDto dishDto = new DishDto();
-                BeanUtils.copyProperties(dish, dishDto);
-                dishDto.setFlavors(list);
-                // 然后返回封装好的DishDto 对象，这是前端需要的对象，前端遍历列表中的每一个dishDto ，然后获取数据
-                return dishDto;
-            }).collect(Collectors.toList());
+                // 然后使用stream 流，挨个看每个dish 菜肴对象的id，拿着id 去dishFlavor菜肴口味表找该id 的菜品所对应的口味
+                Stream<Dish> stream = listDishesById.stream();
+                collect = stream.map((Function<Dish, DishDto>) dish -> {
+                    // 根据指定菜肴id 查找所属的口味
+                    Long dishId = dish.getId();
+                    List<DishFlavor> list = dishFlavorService.list(new LambdaQueryWrapper<DishFlavor>().eq(DishFlavor::getDishId, dishId));
+                    // 将DishFlavor 菜肴口味与Dish 菜肴封装在一起
+                    DishDto dishDto = new DishDto();
+                    BeanUtils.copyProperties(dish, dishDto);
+                    dishDto.setFlavors(list);
+                    // 然后返回封装好的DishDto 对象，这是前端需要的对象，前端遍历列表中的每一个dishDto ，然后获取数据
+                    return dishDto;
+                }).collect(Collectors.toList());
 
+                // 将封装好的，包含Dish 和DishFlavors 的DishDtoList 列表放入缓存中.
+                redisTemplate.opsForHash().put("dish", "dish_" + categoryId, collect);
+            } else {
+                log.warn("dish下的dish_" + categoryId + "存在");
+                collect = (List<DishDto>) dish1;
+            }
             return Result.success(collect);
         }
         return Result.error("id参数不能为空");
