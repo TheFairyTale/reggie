@@ -26,10 +26,15 @@ public class EntityAutoFieldFillMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
         Long currentThreadUserid = LocalThreadVariablePoolUtil.getCurrentThreadUserid();
-        metaObject.setValue("createTime", LocalDateTime.now());
-        metaObject.setValue("updateTime", LocalDateTime.now());
-        metaObject.setValue("createUser", currentThreadUserid);
-        metaObject.setValue("updateUser", currentThreadUserid);
+        if (metaObject.hasSetter("createTime")) {
+            metaObject.setValue("createTime", LocalDateTime.now());
+            metaObject.setValue("updateTime", LocalDateTime.now());
+        }
+        if (metaObject.hasSetter("createUser")) {
+            metaObject.setValue("createUser", currentThreadUserid);
+            metaObject.setValue("updateUser", currentThreadUserid);
+        }
+        if (metaObject.hasSetter("orderTime")) metaObject.setValue("orderTime", LocalDateTime.now());
     }
 
     /**
@@ -40,7 +45,7 @@ public class EntityAutoFieldFillMetaObjectHandler implements MetaObjectHandler {
     @Override
     public void updateFill(MetaObject metaObject) {
         Long currentThreadUserid = LocalThreadVariablePoolUtil.getCurrentThreadUserid();
-        metaObject.setValue("updateTime", LocalDateTime.now());
-        metaObject.setValue("updateUser", currentThreadUserid);
+        if (metaObject.hasSetter("updateTime")) metaObject.setValue("updateTime", LocalDateTime.now());
+        if (metaObject.hasSetter("updateUser")) metaObject.setValue("updateUser", currentThreadUserid);
     }
 }
