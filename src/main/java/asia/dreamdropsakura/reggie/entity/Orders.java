@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 /**
@@ -53,6 +55,7 @@ public class Orders implements Serializable {
      * 下单时间
      *
      */
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime orderTime;
 
     /**
