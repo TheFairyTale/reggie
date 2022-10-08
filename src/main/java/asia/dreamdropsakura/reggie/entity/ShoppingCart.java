@@ -90,6 +90,13 @@ public class ShoppingCart implements Serializable {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
+    @TableField(fill = FieldFill.DEFAULT)
+    private Long createUser;
+
+
+    @TableField(fill = FieldFill.DEFAULT)
+    private Long updateUser;
+
     public Long getId() {
         return id;
     }
