@@ -99,7 +99,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     public IPage<OrderDto> paginationOrders(long page, long pageSize) {
         // order 分页对象
         IPage<Orders> ordersPage = new Page<>(page, pageSize);
-        IPage<Orders> pagedOrders = this.page(ordersPage, null);
+        IPage<Orders> pagedOrders = this.page(ordersPage, new LambdaQueryWrapper<Orders>().orderBy(true, false, Orders::getOrderTime));
 
         List<Orders> records = pagedOrders.getRecords();
         // 用于承载包含订单基本信息与详细信息对象的列表
