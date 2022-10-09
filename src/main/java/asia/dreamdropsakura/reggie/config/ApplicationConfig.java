@@ -19,6 +19,9 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.util.Arrays;
+import java.util.function.Consumer;
+
 /**
  * SpringBoot 应用程序配置类
  *
@@ -66,9 +69,6 @@ public class ApplicationConfig extends CachingConfigurerSupport {
      */
     @Bean
     public Docket createRestApi(Environment environment) {
-        // 显示当前项目的运行环境
-        log.info("Active environment profiles: " + environment.getActiveProfiles().toString());
-
         // 设置要启用/显示Swagger 文档页面的运行环境. 只有当环境为dev 时才启用Swagger
         Profiles profiles = Profiles.of("dev");
         boolean b = environment.acceptsProfiles(profiles);
