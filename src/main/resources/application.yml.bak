@@ -12,6 +12,11 @@ server:
     # 默认2MB
     max-http-form-post-size: 4MB
 spring:
+  # 排除Spring框架和Druid 的自动配置
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
   config:
     activate:
       on-profile: dev
@@ -36,7 +41,7 @@ spring:
         username:
         password:
       # 从数据源
-      slave1:
+      slave:
         type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
         url: jdbc:mysql://:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
@@ -100,6 +105,11 @@ server:
     # 默认2MB
     max-http-form-post-size: 4MB
 spring:
+  # 排除Spring框架和Druid 的自动配置
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
   config:
     activate:
       on-profile: pro
@@ -124,7 +134,7 @@ spring:
         username:
         password:
       # 从数据源
-      slave1:
+      slave:
         type: com.alibaba.druid.pool.DruidDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver
         url: jdbc:mysql://:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
@@ -177,4 +187,4 @@ mybatis-plus:
       logic-delete-value: 1
 # 定义CommonController 中所用的上传文件的存放路径
 reggie:
-  file-path: /temp/
+  file-path: ./temp/
