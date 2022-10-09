@@ -1,3 +1,10 @@
+spring:
+  #设置启用的环境
+  profiles:
+    active: dev
+
+---
+#开发
 server:
   port: 8120
   # 设置Tomcat 应用服务器对文件大小的上传限制
@@ -5,6 +12,9 @@ server:
     # 默认2MB
     max-http-form-post-size: 4MB
 spring:
+  config:
+    activate:
+      on-profile: dev
   application:
     #应用的名称，可选
     name: reggie_take_out_project
@@ -50,3 +60,61 @@ mybatis-plus:
 # 定义CommonController 中所用的上传文件的存放路径
 reggie:
   file-path: D:\Documents\Github\reggie\temp\
+
+---
+#开发
+server:
+  port: 8120
+  # 设置Tomcat 应用服务器对文件大小的上传限制
+  tomcat:
+    # 默认2MB
+    max-http-form-post-size: 4MB
+spring:
+  config:
+    activate:
+      on-profile: pro
+  application:
+    #应用的名称，可选
+    name: reggie_take_out_project
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username:
+      password:
+  redis:
+      host:
+      port:
+      password:
+      database: 0
+  cache:
+    redis:
+      # 设置缓存过期时间 可选的
+      time-to-live: 1800000
+  # 设置SpringMVC 的文件上传解析器对文件上传的大小限制
+  servlet:
+    multipart:
+      # 单文件最大
+      max-file-size: 4MB
+      # 整个请求数据的总大小
+      max-request-size: 10MB
+mybatis:
+  # 指定mapper.xml 的位置
+  mapper-locations: classpath:mapper/*.xml
+mybatis-plus:
+  configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+      # 逻辑删除字段名
+      logic-delete-field: deleted
+      # 逻辑删除字面值：未删除为0
+      logic-not-delete-value: 0
+      # 逻辑删除字面值：删除为1
+      logic-delete-value: 1
+# 定义CommonController 中所用的上传文件的存放路径
+reggie:
+  file-path: /temp/
