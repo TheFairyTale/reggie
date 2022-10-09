@@ -31,6 +31,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
      */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // 添加与Swagger 相关的静态资源映射，以免Swagger 生成的文档无法被访问。
+        registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+
         registry.addResourceHandler("/backend/**").addResourceLocations("classpath:/static/backend/");
         registry.addResourceHandler("/frontend/**").addResourceLocations("classpath:/static/frontend/");
     }

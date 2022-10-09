@@ -64,6 +64,11 @@ public class LoginCheckFilter implements Filter {
                 "/user/sendMsg",
                 "/backend/**",
                 "/front/**",
+                // 排除Swagger 相关页面路径
+                "/doc.html",
+                "/webjars/**",
+                "/swagger-resources",
+                "/v2/api-docs",
         };
 
         // 3. 进行路径匹配，判断本次请求是否需要处理
